@@ -1,23 +1,18 @@
 package vn.iostar.graphql;
 
-import java.util.List;
-
-import com.netflix.graphql.dgs.DgsComponent;
-import com.netflix.graphql.dgs.DgsMutation;
-import com.netflix.graphql.dgs.DgsQuery;
-import com.netflix.graphql.dgs.InputArgument;
-
+import com.netflix.graphql.dgs.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import vn.iostar.entity.User;
 import vn.iostar.service.UserService;
+
+import java.util.List;
+import java.util.Optional;
 
 @DgsComponent
 public class UserDataFetcher {
 
-    private final UserService userService;
-
-    public UserDataFetcher(UserService userService) {
-        this.userService = userService;
-    }
+    @Autowired
+    private UserService userService;
 
     @DgsQuery
     public List<User> users() {
@@ -48,17 +43,23 @@ public class UserDataFetcher {
                            @InputArgument String email,
                            @InputArgument String password,
                            @InputArgument String phone) {
-        return userService.findById(id).map(u -> {
-            if (fullname != null) u.setFullname(fullname);
-            if (email != null) u.setEmail(email);
-            if (password != null) u.setPassword(password);
-            if (phone != null) u.setPhone(phone);
-            return userService.save(u);
-        }).orElse(null);
+        Optional<User> opt = userService.findById(id);
+        if (opt.isEmpty()) return null;
+
+        User u = opt.get();
+        if (fullname != null) u.setFullname(fullname);
+        if (email != null) u.setEmail(email);
+        if (password != null) u.setPassword(password);
+        if (phone != null) u.setPhone(phone);
+
+        return userService.save(u);
     }
 
     @DgsMutation
     public Boolean deleteUser(@InputArgument Long id) {
-        return userService.delete(id);
+        Optional<User> opt = userService.findById(id);
+        if (opt.isEmpty()) return false;
+        userService.delete(id);
+        return true;
     }
 }

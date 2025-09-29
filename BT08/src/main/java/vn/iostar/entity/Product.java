@@ -1,8 +1,6 @@
 package vn.iostar.entity;
 
 import jakarta.persistence.*;
-import java.sql.Timestamp;
-import java.util.Set;
 
 @Entity
 @Table(name = "products")
@@ -11,33 +9,26 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 500, nullable = false)
+    @Column(nullable = false, length = 255)
     private String title;
 
-    @Column(nullable = false)
     private Integer quantity;
 
     @Column(length = 500)
-    private String desc;
+    private String description;
 
     @Column(nullable = false)
     private Double price;
 
-    private Timestamp createDate;
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user; // một user có nhiều product
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @ManyToMany
-    @JoinTable(
-            name = "product_category",
-            joinColumns = @JoinColumn(name = "product_id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id")
-    )
-    private Set<Category> categories;
-
-    // Getters & Setters
+    // Getter + Setter
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -47,18 +38,15 @@ public class Product {
     public Integer getQuantity() { return quantity; }
     public void setQuantity(Integer quantity) { this.quantity = quantity; }
 
-    public String getDesc() { return desc; }
-    public void setDesc(String desc) { this.desc = desc; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
     public Double getPrice() { return price; }
     public void setPrice(Double price) { this.price = price; }
 
-    public Timestamp getCreateDate() { return createDate; }
-    public void setCreateDate(Timestamp createDate) { this.createDate = createDate; }
+    public Category getCategory() { return category; }
+    public void setCategory(Category category) { this.category = category; }
 
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
-
-    public Set<Category> getCategories() { return categories; }
-    public void setCategories(Set<Category> categories) { this.categories = categories; }
 }

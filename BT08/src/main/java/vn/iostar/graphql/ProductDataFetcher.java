@@ -1,31 +1,28 @@
 package vn.iostar.graphql;
 
-import java.util.List;
-
-import com.netflix.graphql.dgs.DgsComponent;
-import com.netflix.graphql.dgs.DgsMutation;
-import com.netflix.graphql.dgs.DgsQuery;
-import com.netflix.graphql.dgs.InputArgument;
-
+import com.netflix.graphql.dgs.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import vn.iostar.entity.Product;
+import vn.iostar.entity.Category;
+import vn.iostar.entity.User;
 import vn.iostar.service.ProductService;
-import vn.iostar.service.UserService;
 import vn.iostar.service.CategoryService;
+import vn.iostar.service.UserService;
 
-@DgsComponent 
+import java.util.List;
+import java.util.Optional;
+
+@DgsComponent
 public class ProductDataFetcher {
 
-    private final ProductService productService;
-    private final UserService userService;
-    private final CategoryService categoryService;
+    @Autowired
+    private ProductService productService;
 
-    public ProductDataFetcher(ProductService productService,
-                              UserService userService,
-                              CategoryService categoryService) {
-        this.productService = productService;
-        this.userService = userService;
-        this.categoryService = categoryService;
-    }
+    @Autowired
+    private CategoryService categoryService;
+
+    @Autowired
+    private UserService userService;
 
     @DgsQuery
     public List<Product> products() {
@@ -38,28 +35,34 @@ public class ProductDataFetcher {
     }
 
     @DgsQuery
-    public List<Product> productsByCategory(@InputArgument Long categoryId) {
-        return productService.findByCategory(categoryId);
+    public List<Product> productsSortedByPrice() {
+        return productService.findAllSortedByPrice();
     }
 
     @DgsQuery
-    public List<Product> productsSortedByPrice() {
-        return productService.findAllSortedByPrice();
+    public List<Product> productsByCategory(@InputArgument Long categoryId) {
+        return productService.findByCategoryId(categoryId);
     }
 
     @DgsMutation
     public Product addProduct(@InputArgument String title,
                               @InputArgument Integer quantity,
-                              @InputArgument String desc,
+                              @InputArgument String description,
                               @InputArgument Double price,
+                              @InputArgument Long categoryId,
                               @InputArgument Long userId) {
         Product p = new Product();
         p.setTitle(title);
         p.setQuantity(quantity);
-        p.setDesc(desc);
+        p.setDescription(description);
         p.setPrice(price);
 
-        userService.findById(userId).ifPresent(p::setUser);
+        Optional<Category> cat = categoryService.findById(categoryId);
+        cat.ifPresent(p::setCategory);
+
+        Optional<User> user = userService.findById(userId);
+        user.ifPresent(p::setUser);
+
         return productService.save(p);
     }
 
@@ -67,23 +70,34 @@ public class ProductDataFetcher {
     public Product updateProduct(@InputArgument Long id,
                                  @InputArgument String title,
                                  @InputArgument Integer quantity,
-                                 @InputArgument String desc,
+                                 @InputArgument String description,
                                  @InputArgument Double price,
+                                 @InputArgument Long categoryId,
                                  @InputArgument Long userId) {
-        return productService.findById(id).map(p -> {
-            if (title != null) p.setTitle(title);
-            if (quantity != null) p.setQuantity(quantity);
-            if (desc != null) p.setDesc(desc);
-            if (price != null) p.setPrice(price);
-            if (userId != null) {
-                userService.findById(userId).ifPresent(p::setUser);
-            }
-            return productService.save(p);
-        }).orElse(null);
+        Optional<Product> opt = productService.findById(id);
+        if (opt.isEmpty()) return null;
+
+        Product p = opt.get();
+        if (title != null) p.setTitle(title);
+        if (quantity != null) p.setQuantity(quantity);
+        if (description != null) p.setDescription(description);
+        if (price != null) p.setPrice(price);
+
+        if (categoryId != null) {
+            categoryService.findById(categoryId).ifPresent(p::setCategory);
+        }
+        if (userId != null) {
+            userService.findById(userId).ifPresent(p::setUser);
+        }
+
+        return productService.save(p);
     }
 
     @DgsMutation
     public Boolean deleteProduct(@InputArgument Long id) {
-        return productService.delete(id);
+        Optional<Product> opt = productService.findById(id);
+        if (opt.isEmpty()) return false;
+        productService.delete(id);
+        return true;
     }
 }

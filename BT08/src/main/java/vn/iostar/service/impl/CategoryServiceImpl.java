@@ -1,9 +1,10 @@
 package vn.iostar.service.impl;
 
-import org.springframework.stereotype.Service;
 import vn.iostar.entity.Category;
 import vn.iostar.repository.CategoryRepository;
 import vn.iostar.service.CategoryService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,29 +12,31 @@ import java.util.Optional;
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
-    private final CategoryRepository categoryRepository;
+    @Autowired
+    private CategoryRepository categoryRepo;
 
-    public CategoryServiceImpl(CategoryRepository categoryRepository) {
-        this.categoryRepository = categoryRepository;
-    }
-
+    @Override
     public List<Category> findAll() {
-        return categoryRepository.findAll();
+        return categoryRepo.findAll();
     }
 
+    @Override
     public Optional<Category> findById(Long id) {
-        return categoryRepository.findById(id);
+        return categoryRepo.findById(id);
     }
 
+    @Override
+    public Optional<Category> findByName(String name) {
+        return categoryRepo.findByName(name);
+    }
+
+    @Override
     public Category save(Category category) {
-        return categoryRepository.save(category);
+        return categoryRepo.save(category);
     }
 
-    public boolean delete(Long id) {
-        if (categoryRepository.existsById(id)) {
-            categoryRepository.deleteById(id);
-            return true;
-        }
-        return false;
+    @Override
+    public void delete(Long id) {
+        categoryRepo.deleteById(id);
     }
 }

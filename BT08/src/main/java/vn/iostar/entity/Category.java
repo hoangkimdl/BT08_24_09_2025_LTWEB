@@ -1,7 +1,6 @@
 package vn.iostar.entity;
 
 import jakarta.persistence.*;
-import java.util.Set;
 
 @Entity
 @Table(name = "categories")
@@ -10,30 +9,25 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, length = 255)
     private String name;
 
+    @Column(length = 500)
+    private String description;
+
+    @Column(length = 255)
     private String images;
 
-    @ManyToMany(mappedBy = "categories")
-    private Set<User> users;
-
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
-    private Set<Product> products;
-
-    // Getter/Setter
+    // Getter + Setter
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
     public String getImages() { return images; }
     public void setImages(String images) { this.images = images; }
-
-    public Set<User> getUsers() { return users; }
-    public void setUsers(Set<User> users) { this.users = users; }
-
-    public Set<Product> getProducts() { return products; }
-    public void setProducts(Set<Product> products) { this.products = products; }
 }

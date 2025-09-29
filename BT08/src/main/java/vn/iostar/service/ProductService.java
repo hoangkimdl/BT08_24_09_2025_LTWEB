@@ -7,10 +7,9 @@ import java.util.Optional;
 
 public interface ProductService {
     List<Product> findAll();
+    List<Product> findAllSortedByPrice();
+    List<Product> findByCategoryId(Long categoryId);
     Optional<Product> findById(Long id);
     Product save(Product product);
-    boolean delete(Long id);
-
-    List<Product> findByCategory(Long categoryId);
-    List<Product> findAllSortedByPrice();
+    void delete(Long id);
 }

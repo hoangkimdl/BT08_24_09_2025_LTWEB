@@ -1,5 +1,6 @@
 package vn.iostar.service.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import vn.iostar.entity.Product;
 import vn.iostar.repository.ProductRepository;
@@ -11,15 +12,22 @@ import java.util.Optional;
 @Service
 public class ProductServiceImpl implements ProductService {
 
-    private final ProductRepository productRepo;
-
-    public ProductServiceImpl(ProductRepository productRepo) {
-        this.productRepo = productRepo;
-    }
+    @Autowired
+    private ProductRepository productRepo;
 
     @Override
     public List<Product> findAll() {
         return productRepo.findAll();
+    }
+
+    @Override
+    public List<Product> findAllSortedByPrice() {
+        return productRepo.findAllByOrderByPriceAsc();
+    }
+
+    @Override
+    public List<Product> findByCategoryId(Long categoryId) {
+        return productRepo.findByCategory_Id(categoryId);
     }
 
     @Override
@@ -33,21 +41,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public boolean delete(Long id) {
-        if (productRepo.existsById(id)) {
-            productRepo.deleteById(id);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public List<Product> findByCategory(Long categoryId) {
-        return productRepo.findByCategories_Id(categoryId);
-    }
-
-    @Override
-    public List<Product> findAllSortedByPrice() {
-        return productRepo.findAllByOrderByPriceAsc();
+    public void delete(Long id) {
+        productRepo.deleteById(id);
     }
 }

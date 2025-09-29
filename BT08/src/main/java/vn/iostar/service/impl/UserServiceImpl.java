@@ -1,9 +1,10 @@
 package vn.iostar.service.impl;
 
-import org.springframework.stereotype.Service;
 import vn.iostar.entity.User;
 import vn.iostar.repository.UserRepository;
 import vn.iostar.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,33 +12,26 @@ import java.util.Optional;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository;
-
-    public UserServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    @Autowired
+    private UserRepository userRepo;
 
     @Override
     public List<User> findAll() {
-        return userRepository.findAll();
+        return userRepo.findAll();
     }
 
     @Override
     public Optional<User> findById(Long id) {
-        return userRepository.findById(id);
+        return userRepo.findById(id);
     }
 
     @Override
     public User save(User user) {
-        return userRepository.save(user);
+        return userRepo.save(user);
     }
 
     @Override
-    public boolean delete(Long id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
-            return true;
-        }
-        return false;
+    public void delete(Long id) {
+        userRepo.deleteById(id);
     }
 }
